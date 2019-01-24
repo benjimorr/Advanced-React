@@ -132,4 +132,4 @@ class UpdateItem extends Component {
 }
 
 export default UpdateItem;
-export { UPDATE_ITEM_MUTATION };
+export { UPDATE_ITEM_MUTATION, SINGLE_ITEM_QUERY };
