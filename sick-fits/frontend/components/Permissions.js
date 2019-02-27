@@ -1,3 +1,4 @@
+import React from 'react';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import PropTypes from 'prop-types';
@@ -119,7 +120,7 @@ class UserPermissions extends React.Component {
           <>
             {error && (
               <tr>
-                <td colspan="8">
+                <td colSpan="8">
                   <Error error={error} />
                 </td>
               </tr>
