@@ -28,14 +28,16 @@ function totalItems(cart) {
 }
 
 class CheckOut extends Component {
-  onToken = (res, createOrder) => {
-    createOrder({
+  onToken = async (res, createOrder) => {
+    const order = await createOrder({
       variables: {
         token: res.id
       }
     }).catch(err => {
       alert(err.message);
     });
+
+    console.log(order);
   };
 
   render() {
@@ -51,7 +53,9 @@ class CheckOut extends Component {
                 amount={calcTotalPrice(me.cart)}
                 name="Sick Fits"
                 description={`Order of ${totalItems(me.cart)} items`}
-                image={me.cart[0].item && me.cart[0].item.image}
+                image={
+                  me.cart.length && me.cart[0].item && me.cart[0].item.image
+                }
                 stripeKey="pk_test_yNaxPIEq85A8Oa9HSsbgUymd"
                 currency="USD"
                 email={me.email}
