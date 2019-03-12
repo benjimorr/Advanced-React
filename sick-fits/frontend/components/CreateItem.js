@@ -4,7 +4,6 @@ import gql from 'graphql-tag';
 import Router from 'next/router';
 import Form from './styles/Form';
 import Error from './ErrorMessage';
-import formatMoney from '../lib/formatMoney';
 
 const CREATE_ITEM_MUTATION = gql`
   mutation CREATE_ITEM_MUTATION(
@@ -67,8 +66,9 @@ class CreateItem extends Component {
       <Mutation mutation={CREATE_ITEM_MUTATION} variables={this.state}>
         {(createItem, { loading, error }) => (
           <Form
+            data-test="create-item-form"
             onSubmit={async e => {
-              //Stop the form from submitting
+              // Stop the form from submitting
               e.preventDefault();
               // Call the mutation
               const res = await createItem();
