@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { hasPermission } = require('../utils');
+const { transport, makeANiceEmail } = require('../mail');
 const stripe = require('../stripe');
 
 const getJwtToken = obj => jwt.sign(obj, process.env.APP_SECRET);
@@ -127,8 +128,19 @@ const Mutation = {
       where: { email: args.email },
       data: { resetToken, resetTokenExpiry }
     });
-    return { message: 'Thanks!' };
     // 3. Email them that reset token
+    const mailResponse = await transport.sendMail({
+      from: 'support@sick-fits.com',
+      to: user.email,
+      subject: 'Your Password Reset Token',
+      html: makeANiceEmail(`Your Password Reset Token is here!
+        \n\n
+        <a href="${
+          process.env.FRONTEND_URL
+        }/reset?resetToken=${resetToken}">Click Here to Reset</a>`)
+    });
+    // 4. Return the message
+    return { message: 'Thanks!' };
   },
   async resetPassword(parent, args, ctx, info) {
     // 1. Check if the passwords match
@@ -290,7 +302,7 @@ const Mutation = {
         ...cartItem.item,
         quantity: cartItem.quantity,
         user: { connect: { id: userId } }
-      }
+      };
       delete orderItem.id;
       return orderItem;
     });
@@ -300,12 +312,14 @@ const Mutation = {
         total: charge.amount,
         charge: charge.id,
         items: { create: orderItems },
-        user: { connect: {id: userId } }
+        user: { connect: { id: userId } }
       }
     });
     // 6. Clean up - clear the users cart, delete cartItems
     const cartItemIds = user.cart.map(cartItem => cartItem.id);
-    await ctx.db.mutation.deleteManyCartItems({ where: { id_in: cartItemIds } });
+    await ctx.db.mutation.deleteManyCartItems({
+      where: { id_in: cartItemIds }
+    });
     // 7. Return the Order to the client
     return order;
   }
